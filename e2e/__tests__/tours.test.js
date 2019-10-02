@@ -2,7 +2,6 @@ const request = require('../request');
 const db = require('../db');
 const { matchMongoId } = require('../match-helpers');
 
-//POST /api/tours
 describe('tours api', () => {
   beforeEach(() => {
     return Promise.all([
@@ -13,7 +12,7 @@ describe('tours api', () => {
 
   const tour = {
     title: 'De-Tour',
-    activities: [],
+    activities: ['fun', 'music', 'dancing'],
     launchDate: new Date(),
     stops: []
   };
@@ -33,17 +32,49 @@ describe('tours api', () => {
           launchDate: expect.any(String),
           ...matchMongoId
         },
+
         `
         Object {
           "__v": 0,
           "_id": StringMatching /\\^\\[a-f\\\\d\\]\\{24\\}\\$/i,
-          "activities": Array [],
+          "activities": Array [
+            "fun",
+            "music",
+            "dancing",
+          ],
           "launchDate": Any<String>,
           "stops": Array [],
           "title": "De-Tour",
         }
       `
       );
+    });
+  });
+
+  it('gets a tour by id', () => {
+    return postTour(tour).then(savedTour => {
+      return request
+        .get(`/api/tours/${savedTour._id}`)
+        .expect(200)
+        .then(({ body }) => {
+          expect(body).toMatchInlineSnapshot(
+            { _id: expect.any(String) },
+            `
+            Object {
+              "__v": 0,
+              "_id": Any<String>,
+              "activities": Array [
+                "fun",
+                "music",
+                "dancing",
+              ],
+              "launchDate": "2019-10-02T03:39:58.913Z",
+              "stops": Array [],
+              "title": "De-Tour",
+            }
+          `
+          );
+        });
     });
   });
 });
