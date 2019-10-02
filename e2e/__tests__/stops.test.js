@@ -23,11 +23,6 @@ describe('stops api', () => {
     return db.dropCollection('stops');
   });
 
-  //POST /tours/:id/stops
-  // {
-  //   "address": "123 Main St"
-  // }
-
   const stop1 = {
     address: '97209'
   };

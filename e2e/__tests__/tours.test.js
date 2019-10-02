@@ -1,6 +1,22 @@
+jest.mock('../../lib/services/maps-api');
+jest.mock('../../lib/services/weather-api');
+
 const request = require('../request');
 const db = require('../db');
 const { matchMongoId } = require('../match-helpers');
+const getLocation = require('../../lib/services/maps-api');
+const getForecast = require('../../lib/services/weather-api');
+
+getLocation.mockResolvedValue({
+  latitude: 45.5266975,
+  longitude: -122.6880503
+});
+
+getForecast.mockResolvedValue({
+  temperature: 62,
+  windDirection: 'NNE',
+  precipitationType: 'drizzle'
+});
 
 describe('tours api', () => {
   beforeEach(() => {
@@ -10,17 +26,8 @@ describe('tours api', () => {
     ]);
   });
 
-  const performance = {
-    location: {
-      latitude: 45.5266975,
-      longitude: -122.6880503
-    },
-    weather: {
-      temperature: 62,
-      windDirection: 'NNE',
-      precipitationType: 'drizzle'
-    },
-    attendance: 50
+  const stop = {
+    address: '97209'
   };
 
   const tour = {
@@ -33,16 +40,16 @@ describe('tours api', () => {
   function postTour(tour) {
     return request
       .post('/api/stops')
-      .send(performance)
+      .send(stop)
       .expect(200)
       .then(({ body }) => {
         tour.stops[0] = body.id;
         return request
           .post('/api/tours')
           .send(tour)
-          .expect(200)
-        })
-        .then(({ body }) => body);
+          .expect(200);
+      })
+      .then(({ body }) => body);
   }
 
   it('posts a tour', () => {
@@ -50,9 +57,25 @@ describe('tours api', () => {
       expect(tour).toMatchInlineSnapshot(
         {
           launchDate: expect.any(String),
-          stops: [expect.any(String)],
+          stops: [expect.any(Object)],
           ...matchMongoId
         },
+        `
+        Object {
+          "__v": 0,
+          "_id": StringMatching /\\^\\[a-f\\\\d\\]\\{24\\}\\$/i,
+          "activities": Array [
+            "fun",
+            "music",
+            "dancing",
+          ],
+          "launchDate": Any<String>,
+          "stops": Array [
+            Any<Object>,
+          ],
+          "title": "De-Tour",
+        }
+        `
       );
     });
   });
@@ -64,7 +87,27 @@ describe('tours api', () => {
         .expect(200)
         .then(({ body }) => {
           expect(body).toMatchInlineSnapshot(
-            { _id: expect.any(String) },
+            {
+              launchDate: expect.any(String),
+              stops: [expect.any(Object)],
+              ...matchMongoId
+            },
+            `
+            Object {
+              "__v": 0,
+              "_id": StringMatching /\\^\\[a-f\\\\d\\]\\{24\\}\\$/i,
+              "activities": Array [
+                "fun",
+                "music",
+                "dancing",
+              ],
+              "launchDate": Any<String>,
+              "stops": Array [
+                Any<Object>,
+              ],
+              "title": "De-Tour",
+            }
+            `
           );
         });
     });
