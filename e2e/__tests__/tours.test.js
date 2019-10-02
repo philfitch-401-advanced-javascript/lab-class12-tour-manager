@@ -10,6 +10,19 @@ describe('tours api', () => {
     ]);
   });
 
+  const stop = {
+    location: {
+      latitude: 45.5266975,
+      longitude: -122.6880503
+    },
+    weather: {
+      temperature: 62,
+      windDirection: 'NNE',
+      precipitationType: 'drizzle'
+    },
+    attendance: 50
+  };
+
   const tour = {
     title: 'De-Tour',
     activities: ['fun', 'music', 'dancing'],
@@ -19,10 +32,17 @@ describe('tours api', () => {
 
   function postTour(tour) {
     return request
-      .post('/api/tours')
-      .send(tour)
+      .post('/api/stops')
+      .send(stop)
       .expect(200)
-      .then(({ body }) => body);
+      .then(({ body }) => {
+        tour.stops[0] = body.id;
+        return request
+          .post('/api/tours')
+          .send(tour)
+          .expect(200)
+        })
+        .then(({ body }) => body);
   }
 
   it('posts a tour', () => {
@@ -30,23 +50,9 @@ describe('tours api', () => {
       expect(show).toMatchInlineSnapshot(
         {
           launchDate: expect.any(String),
+          stops: [expect.any(String)],
           ...matchMongoId
         },
-
-        `
-        Object {
-          "__v": 0,
-          "_id": StringMatching /\\^\\[a-f\\\\d\\]\\{24\\}\\$/i,
-          "activities": Array [
-            "fun",
-            "music",
-            "dancing",
-          ],
-          "launchDate": Any<String>,
-          "stops": Array [],
-          "title": "De-Tour",
-        }
-      `
       );
     });
   });
@@ -59,20 +65,6 @@ describe('tours api', () => {
         .then(({ body }) => {
           expect(body).toMatchInlineSnapshot(
             { _id: expect.any(String) },
-            `
-            Object {
-              "__v": 0,
-              "_id": Any<String>,
-              "activities": Array [
-                "fun",
-                "music",
-                "dancing",
-              ],
-              "launchDate": "2019-10-02T03:39:58.913Z",
-              "stops": Array [],
-              "title": "De-Tour",
-            }
-          `
           );
         });
     });
