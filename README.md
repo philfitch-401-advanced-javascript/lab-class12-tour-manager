@@ -1,8 +1,8 @@
-# LAB - 
+# LAB - Class 12
 
-## Project Name
+## Tour Manager
 
-### Author: Student/Group Name
+### Phil Fitch
 
 ### Links and Resources
 * [submission PR](http://xyz.com)
@@ -17,7 +17,7 @@
 
 ### Setup
 #### `.env` requirements
-* `PORT` - Port Number
+* `PORT` - 3000
 * `MONGODB_URI` - URL to the running mongo instance/db
 
 **or, include an `.env.example`**
