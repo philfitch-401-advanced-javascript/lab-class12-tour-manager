@@ -84,7 +84,16 @@ describe('tours api', () => {
       .then(([, stops]) => {
         expect(stops[0]).toEqual ({
           ...matchMongoId,
-          ...stop1,
+          attendance: 0,
+          location: {
+            latitude: 45.5266975,
+            longitude: -122.6880503  
+          },
+          weather: {
+            temperature: 62,
+            windDirection: 'NNE',
+            precipitationType: 'drizzle'
+          }
         });
       });
   });
