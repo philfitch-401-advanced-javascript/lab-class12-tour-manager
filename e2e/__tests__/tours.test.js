@@ -10,7 +10,7 @@ describe('tours api', () => {
     ]);
   });
 
-  const stop = {
+  const performance = {
     location: {
       latitude: 45.5266975,
       longitude: -122.6880503
@@ -33,7 +33,7 @@ describe('tours api', () => {
   function postTour(tour) {
     return request
       .post('/api/stops')
-      .send(stop)
+      .send(performance)
       .expect(200)
       .then(({ body }) => {
         tour.stops[0] = body.id;
@@ -46,8 +46,8 @@ describe('tours api', () => {
   }
 
   it('posts a tour', () => {
-    return postTour(tour).then(show => {
-      expect(show).toMatchInlineSnapshot(
+    return postTour(tour).then(tour => {
+      expect(tour).toMatchInlineSnapshot(
         {
           launchDate: expect.any(String),
           stops: [expect.any(String)],
