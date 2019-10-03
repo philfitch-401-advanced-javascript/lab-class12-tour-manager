@@ -42,6 +42,7 @@ describe('tours api', () => {
   }
 
   it('posts a tour', () => {
+
     return postTour(tour1).then(tour => {
       expect(tour).toMatchInlineSnapshot(
         {
@@ -80,6 +81,7 @@ describe('tours api', () => {
   }
 
   it('adds a stop to a tour', () => {
+
     return postTourWithStop(tour1, stop1)
       .then(([, stops]) => {
         expect(stops[0]).toEqual ({
@@ -98,7 +100,21 @@ describe('tours api', () => {
       });
   });
 
+  it.skip('removes a stop', () => {
+
+    return postTourWithStop(tour1, stop1)
+      .then(([tour, stops]) => {
+        return request
+          .delete(`/api/tours/${tour._id}/stops/${stops[0]._id}`)
+          .expect(200);
+      })
+      .then(({ body }) => {
+        expect(body.length).toBe(0);
+      });
+  });
+
   it('gets a tour by id', () => {
+
     return postTour(tour1).then(savedTour => {
       return request
         .get(`/api/tours/${savedTour._id}`)
