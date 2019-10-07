@@ -100,16 +100,18 @@ describe('tours api', () => {
       });
   });
 
-  it.skip('removes a stop', () => {
+  it('removes a stop', () => {
 
     return postTourWithStop(tour1, stop1)
       .then(([tour, stops]) => {
+        console.log(tour, stops)
         return request
           .delete(`/api/tours/${tour._id}/stops/${stops[0]._id}`)
-          .expect(200);
+          .expect(200)
+          .then(({ body }) => [tour, body]);
       })
-      .then(({ body }) => {
-        expect(body.length).toBe(0);
+      .then(res => {
+        expect(res[0].stops.length).toBe(0);
       });
   });
 
