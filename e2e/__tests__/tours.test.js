@@ -104,7 +104,6 @@ describe('tours api', () => {
 
     return postTourWithStop(tour1, stop1)
       .then(([tour, stops]) => {
-        console.log(tour, stops)
         return request
           .delete(`/api/tours/${tour._id}/stops/${stops[0]._id}`)
           .expect(200)
@@ -114,6 +113,22 @@ describe('tours api', () => {
         expect(res[0].stops.length).toBe(0);
       });
   });
+
+  it('updates attendance', () => {
+
+    return postTourWithStop(tour1, stop1)
+      .then(([tour, stops]) => {
+        tour.stops = stops
+        tour.stops[0].attendance = 150;
+        return request
+          .put(`/api/tours/${tour._id}/stops/${stops[0]._id}`)
+          .send(tour)
+          .expect(200);
+      })
+      .then(({ body }) => {
+        expect(body[0].attendance).toBe(150);
+      });
+  })
 
   it('gets a tour by id', () => {
 
@@ -146,5 +161,6 @@ describe('tours api', () => {
     });
   });
 
+  
 
 });
