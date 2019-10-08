@@ -1,23 +1,24 @@
-# LAB - 
+# LAB - Class 12
 
-## Project Name
+## Tour Manager
 
-### Author: Student/Group Name
+### Phil Fitch
 
 ### Links and Resources
-* [submission PR](http://xyz.com)
-* [travis](http://xyz.com)
+* [submission PR](https://github.com/philfitch-401-advanced-javascript/lab-class12-tour-manager/pull/2)
+* [travis](https://travis-ci.com/philfitch-401-advanced-javascript/lab-class12-tour-manager)
 * [back-end](http://xyz.com) (when applicable)
 * [front-end](http://xyz.com) (when applicable)
 
 #### Documentation
-* [api docs](http://xyz.com) (API servers)
+* [api docs](https://maps.googleapis.com/maps/api/geocode/json) (API servers)
+* [api docs](https://api.darksky.net/forecast) (API servers)
 * [jsdoc](http://xyz.com) (Server assignments)
 * [styleguide](http://xyz.com) (React assignments)
 
 ### Setup
 #### `.env` requirements
-* `PORT` - Port Number
+* `PORT` - 3000
 * `MONGODB_URI` - URL to the running mongo instance/db
 
 **or, include an `.env.example`**

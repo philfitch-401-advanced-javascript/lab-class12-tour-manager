@@ -5,14 +5,14 @@ const request = require('../request');
 const db = require('../db');
 const { matchMongoId } = require('../match-helpers');
 const getLocation = require('../../lib/services/maps-api');
-const getForecast = require('../../lib/services/weather-api');
+const getWeather = require('../../lib/services/weather-api');
 
 getLocation.mockResolvedValue({
   latitude: 45.5266975,
   longitude: -122.6880503
 });
 
-getForecast.mockResolvedValue({
+getWeather.mockResolvedValue({
   temperature: 62,
   windDirection: 'NNE',
   precipitationType: 'drizzle'
@@ -26,11 +26,7 @@ describe('tours api', () => {
     ]);
   });
 
-  const stop = {
-    address: '97209'
-  };
-
-  const tour = {
+  const tour1 = {
     title: 'De-Tour',
     activities: ['fun', 'music', 'dancing'],
     launchDate: new Date(),
@@ -39,25 +35,18 @@ describe('tours api', () => {
 
   function postTour(tour) {
     return request
-      .post('/api/stops')
-      .send(stop)
+      .post('/api/tours')
+      .send(tour)
       .expect(200)
-      .then(({ body }) => {
-        tour.stops[0] = body.id;
-        return request
-          .post('/api/tours')
-          .send(tour)
-          .expect(200);
-      })
       .then(({ body }) => body);
   }
 
   it('posts a tour', () => {
-    return postTour(tour).then(tour => {
+
+    return postTour(tour1).then(tour => {
       expect(tour).toMatchInlineSnapshot(
         {
           launchDate: expect.any(String),
-          stops: [expect.any(Object)],
           ...matchMongoId
         },
         `
@@ -70,18 +59,80 @@ describe('tours api', () => {
             "dancing",
           ],
           "launchDate": Any<String>,
-          "stops": Array [
-            Any<Object>,
-          ],
+          "stops": Array [],
           "title": "De-Tour",
         }
-        `
+      `
       );
     });
   });
 
+  const stop1 = { address: '97209' };
+
+  function postTourWithStop(tour, stop) {
+    return postTour(tour)
+      .then(tour => {
+        return request
+          .post(`/api/tours/${tour._id}/stops`)
+          .send(stop)
+          .expect(200)
+          .then(({ body }) => [tour, body]);
+      });
+  }
+
+  it('adds a stop to a tour', () => {
+
+    return postTourWithStop(tour1, stop1)
+      .then(([, stops]) => {
+        expect(stops[0]).toEqual ({
+          ...matchMongoId,
+          attendance: 0,
+          location: {
+            latitude: 45.5266975,
+            longitude: -122.6880503  
+          },
+          weather: {
+            temperature: 62,
+            windDirection: 'NNE',
+            precipitationType: 'drizzle'
+          }
+        });
+      });
+  });
+
+  it('removes a stop', () => {
+
+    return postTourWithStop(tour1, stop1)
+      .then(([tour, stops]) => {
+        return request
+          .delete(`/api/tours/${tour._id}/stops/${stops[0]._id}`)
+          .expect(200)
+          .then(({ body }) => [tour, body]);
+      })
+      .then(res => {
+        expect(res[0].stops.length).toBe(0);
+      });
+  });
+
+  it('updates attendance', () => {
+
+    return postTourWithStop(tour1, stop1)
+      .then(([tour, stops]) => {
+        tour.stops = stops
+        tour.stops[0].attendance = 150;
+        return request
+          .put(`/api/tours/${tour._id}/stops/${stops[0]._id}`)
+          .send(tour)
+          .expect(200);
+      })
+      .then(({ body }) => {
+        expect(body[0].attendance).toBe(150);
+      });
+  })
+
   it('gets a tour by id', () => {
-    return postTour(tour).then(savedTour => {
+
+    return postTour(tour1).then(savedTour => {
       return request
         .get(`/api/tours/${savedTour._id}`)
         .expect(200)
@@ -89,7 +140,6 @@ describe('tours api', () => {
           expect(body).toMatchInlineSnapshot(
             {
               launchDate: expect.any(String),
-              stops: [expect.any(Object)],
               ...matchMongoId
             },
             `
@@ -102,16 +152,15 @@ describe('tours api', () => {
                 "dancing",
               ],
               "launchDate": Any<String>,
-              "stops": Array [
-                Any<Object>,
-              ],
+              "stops": Array [],
               "title": "De-Tour",
             }
-            `
+          `
           );
         });
     });
   });
-});
 
-//GET /api/tours
+  
+
+});
